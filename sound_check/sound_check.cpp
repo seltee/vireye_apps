@@ -14,35 +14,35 @@ uint16 soundCallback(){
 void displayPinName(){
 	switch(pin){
 		case 0:
-			dDisplayText("GPIOB_PIN_5", 4, 10, 10);
+			dDisplayText("GPIOB_PIN_4", 4, 10, 10);
 			break;
 			
 		case 1:
-			dDisplayText("GPIOB_PIN_6", 4, 10, 10);
+			dDisplayText("GPIOB_PIN_5", 4, 10, 10);
 			break;
 			
 		case 2:
-			dDisplayText("GPIOB_PIN_7", 4, 10, 10);
+			dDisplayText("GPIOB_PIN_6", 4, 10, 10);
 			break;
 			
 		case 3:
-			dDisplayText("GPIOA_PIN_8", 4, 10, 10);
+			dDisplayText("GPIOB_PIN_7", 4, 10, 10);
 			break;
 			
 		case 4:
-			dDisplayText("GPIOA_PIN_9", 4, 10, 10);
+			dDisplayText("GPIOB_PIN_8", 4, 10, 10);
 			break;
 			
 		case 5:
-			dDisplayText("GPIOA_PIN_10", 4, 10, 10);
+			dDisplayText("GPIOB_PIN_9", 4, 10, 10);
 			break;
 			
 		case 6:
-			dDisplayText("GPIOA_PIN_11", 4, 10, 10);
+			dDisplayText("GPIOB_PIN_10", 4, 10, 10);
 			break;
 			
 		case 7:
-			dDisplayText("GPIOA_PIN_12", 4, 10, 10);
+			dDisplayText("GPIOB_PIN_11", 4, 10, 10);
 			break;
 	}
 }
