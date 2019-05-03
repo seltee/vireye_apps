@@ -2,6 +2,7 @@
 #include "selector.h"
 #include "utils.h"
 #include "sound_player.h"
+#include "config.h"
 
 enum{
 	EXT_UNKNOWN = 0,
@@ -13,27 +14,13 @@ struct FileData{
 	char type;
 };
 
-
-const uint8 selectedSprite[20*6] = { 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
-};
 FileData files[64];
 char fCount = 0;
 char path[256];
 unsigned char readBuffer[512];
 char prevState = 0, move;
 bool buttonPrevState = false;
+bool confButtonPrevState = false;
 int selected = 0;
 	
 // Update, input, draw
@@ -41,13 +28,13 @@ char selectorUpdate(){
 	char ext;
 	
 	// Moving on the list
-	move = (iGetYAxis() > 1024) ? 2 : (iGetYAxis() < -1024) ? 1 : 0;
+	move = (getYAxis() > 1024) ? 2 : (getYAxis() < -1024) ? 1 : 0;
 	if (move == 2 && move != prevState && selected > 0) selected--;
 	if (move == 1 && move != prevState && selected < fCount-1) selected++;
 	prevState = move;
 	
 	// Selecting file
-	if (!buttonPrevState && iGetState(INPUT_A)){
+	if (!buttonPrevState && getButtonState(INPUT_A)){
 		ext = getExt(files[selected].name);
 		if (ext){
 			switch(ext){
@@ -58,17 +45,17 @@ char selectorUpdate(){
 		}else{
 			if (files[selected].type == FILE_TYPE_RUNNABLE){
 				memcpy(path+strlen(path), files[selected].name, strlen(files[selected].name) + 1);
-				sRun(path, megaBuffer);
+				run(path, megaBuffer);
 			}
 			if (files[selected].type == FILE_TYPE_DIRECTORY){
-				if (hCmp("..", files[selected].name)){
+				if (cmp("..", files[selected].name)){
 					path[strlen(path)-1] = 0;
 					while(path[strlen(path)-1] != '/') path[strlen(path)-1] = 0;
 					updateFolder();
 				} else {
 					memcpy(path+strlen(path), files[selected].name, strlen(files[selected].name) + 1);
 					char len = strlen(path);
-						path[len] = '/';
+					path[len] = '/';
 					path[len+1] = 0;
 					updateFolder();
 				}
@@ -76,38 +63,44 @@ char selectorUpdate(){
 			}
 		}
 	}
-	buttonPrevState = iGetState(INPUT_A);
+	buttonPrevState = getButtonState(INPUT_A);
+	
+	// Configuration
+	if (!confButtonPrevState && getButtonState(INPUT_SELECT)){
+		return openConfig();
+	}
+	confButtonPrevState = getButtonState(INPUT_SELECT);
 	
 	// Selection Sprite
-	dDisplaySpriteBitMask(selectedSprite, 3, 0, selected*15+5, 20, 6);
+	displaySpriteBitMask(selectedSprite, 3, 0, selected*15+5, 20, 6);
 
 	// Drawing list
 	for (int i = 0; i < 14; i++){
 		if (i < fCount){
 			switch(files[i].type){
 				case FILE_TYPE_RUNNABLE:
-					dDisplayText(files[i].name, 7, 5, 5+15*i, false);
+					displayText(files[i].name, 7, 5, 5+15*i, false);
 					break;
 
 				case FILE_TYPE_DIRECTORY:
-					dDisplayText(files[i].name, 4, 5, 5+15*i, false);
+					displayText(files[i].name, 4, 5, 5+15*i, false);
 					break;
 
 				default:
 					ext = getExt(files[i].name);
 					switch(ext){
 						case EXT_WAV:
-							dDisplayText(files[i].name, 8, 5, 5+15*i, false);
+							displayText(files[i].name, 8, 5, 5+15*i, false);
 							break;
 							
 						default:
-							dDisplayText(files[i].name, 6, 5, 5+15*i, false);
+							displayText(files[i].name, 6, 5, 5+15*i, false);
 					}
 			}
 			
 		}
 	}
-	dDisplayText(path, 2, 5, 214, false);
+	displayText(path, 2, 5, 214, false);
 	
 	return MODE_SELECTOR;
 }
@@ -116,10 +109,10 @@ char selectorUpdate(){
 void updateFolder(){
 	DirectoryReader dirReader;
 	FileInfo fileInfo;
-	fsReadDir(path, &dirReader);
+	readDir(path, &dirReader);
 	fCount = 0;
-	while(fsReadNextFile(files[fCount].name, 15, &dirReader, &fileInfo)){
-		if (fCount < 64 && !(fileInfo.flags & FILE_FLAG_HIDDEN) && !hCmp(".", files[fCount].name)){
+	while(readNextFile(files[fCount].name, 15, &dirReader, &fileInfo)){
+		if (fCount < 64 && !(fileInfo.flags & FILE_FLAG_HIDDEN) && !cmp(".", files[fCount].name)){
 			files[fCount].type = fileInfo.fileType;
 			fCount++;
 		}

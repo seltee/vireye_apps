@@ -24,14 +24,14 @@ int prevSample;
 char bytesPerSample;
 int position;
 bool rightPart;
-int read;
+int readed;
 bool playing;
 
 FileWorker fileWorker;
 WavStruct wavStruct;
 
 uint16 snd(){
-	if (position < read){
+	if (position < readed){
 		position++;
 		lengthPlayed += bytesPerSample;
 		if (position == 6*1024) position = 0;
@@ -63,13 +63,13 @@ char soundPlayerUpdate(){
 			c++;
 			if (c >= 6*1024) c = 0;
 		}
-		dDisplaySpriteBitMask(drawBuffer, 7, 0, 0, 20, 120);
+		displaySpriteBitMask(drawBuffer, 7, 0, 0, 20, 120);
 			
 		if (!rightPart && position < 3*1024){
 			rightPart = true;
-			addition = fsRead(&fileWorker, megaBuffer+3*1024, 3*1024);
+			addition = readFile(&fileWorker, megaBuffer+3*1024, 3*1024);
 			if (addition){
-				read += addition;
+				readed += addition;
 			}else{
 				stop();
 			}
@@ -77,18 +77,18 @@ char soundPlayerUpdate(){
 		
 		if (rightPart && position > 3*1024){
 			rightPart = false;
-			addition = fsRead(&fileWorker, megaBuffer, 3*1024);
+			addition = readFile(&fileWorker, megaBuffer, 3*1024);
 			if (addition){
-				read += addition;
+				readed += addition;
 			}else{
 				stop();
 			}
 		}
 	} else {
-		dDisplayText("Press Y to exit", 7, 5, 5, false);
+		displayText("Press Y to exit", 7, 5, 5, false);
 	}
 	
-	if (iGetState(INPUT_Y)){
+	if (getButtonState(INPUT_Y)){
 		stop();
 		return openSelector();
 	}
@@ -97,24 +97,24 @@ char soundPlayerUpdate(){
 }
 
 char openSoundPlayer(char *file){
-	if (!fsReadFile(file, &fileWorker)) return 0;
+	if (!openToRead(file, &fileWorker)) return 0;
 
-	fsRead(&fileWorker, &wavStruct, 44);
+	readFile(&fileWorker, &wavStruct, 44);
 
 	lengthPlayed = 0;
 	prevSample = 0;
 	position = 0;
 	rightPart = false;
 	bytesPerSample = wavStruct.numberOfChannels * (wavStruct.bitsPerSample >> 3);
-	read = fsRead(&fileWorker, megaBuffer, 3*1024);
+	readed = readFile(&fileWorker, megaBuffer, 3*1024);
 	playing = true;
 	
-	sndEnableSoundMono(wavStruct.sampleRate, wavStruct.bitsPerSample, snd);
+	enableSoundMono(wavStruct.sampleRate, wavStruct.bitsPerSample, snd);
 	return MODE_SOUND_PLAYER;
 }
 
 void stop(){
-	sndDisableSound();
+	disableSound();
 	playing = false;
 }
 

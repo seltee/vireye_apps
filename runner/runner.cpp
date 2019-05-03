@@ -1,18 +1,20 @@
 #include "../core.h"
 #include "selector.h"
 #include "sound_player.h"
+#include "config.h"
 #include "utils.h"
+
 
 unsigned char spriteBuffer[2*1024];
 char mode;
 
 int32 main(){
 	// Init main systems
-	dSetSpriteMemory(spriteBuffer, 2*1024);	
-	if (!fsInit(readBuffer)){
+	setSpriteMemory(spriteBuffer, 2*1024);	
+	if (!setFSMemory(readBuffer)){
 		while(1){
-			dDisplayText("SD is not available", 2, 5, 5, false);
-			dSync();
+			displayText("SD is not available", 2, 5, 5, false);
+			sync();
 		}
 	}
 	
@@ -27,8 +29,12 @@ int32 main(){
 			case MODE_SOUND_PLAYER:
 				mode = soundPlayerUpdate();
 				break;
+				
+			case MODE_CONFIG:
+				mode = configUpdate();
+				break;
 		}
-		dSync();
+		sync();
 	}
 	return 0;
 }

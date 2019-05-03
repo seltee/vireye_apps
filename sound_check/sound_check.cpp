@@ -14,35 +14,35 @@ uint16 soundCallback(){
 void displayPinName(){
 	switch(pin){
 		case 0:
-			dDisplayText("GPIOB_PIN_4", 4, 10, 10);
+			displayText("GPIOB_PIN_4", 4, 10, 10);
 			break;
 			
 		case 1:
-			dDisplayText("GPIOB_PIN_5", 4, 10, 10);
+			displayText("GPIOB_PIN_5", 4, 10, 10);
 			break;
 			
 		case 2:
-			dDisplayText("GPIOB_PIN_6", 4, 10, 10);
+			displayText("GPIOB_PIN_6", 4, 10, 10);
 			break;
 			
 		case 3:
-			dDisplayText("GPIOB_PIN_7", 4, 10, 10);
+			displayText("GPIOB_PIN_7", 4, 10, 10);
 			break;
 			
 		case 4:
-			dDisplayText("GPIOB_PIN_8", 4, 10, 10);
+			displayText("GPIOB_PIN_8", 4, 10, 10);
 			break;
 			
 		case 5:
-			dDisplayText("GPIOB_PIN_9", 4, 10, 10);
+			displayText("GPIOB_PIN_9", 4, 10, 10);
 			break;
 			
 		case 6:
-			dDisplayText("GPIOB_PIN_10", 4, 10, 10);
+			displayText("GPIOB_PIN_10", 4, 10, 10);
 			break;
 			
 		case 7:
-			dDisplayText("GPIOB_PIN_11", 4, 10, 10);
+			displayText("GPIOB_PIN_11", 4, 10, 10);
 			break;
 	}
 }
@@ -51,22 +51,22 @@ int32 main(){
 	bool upPressed = false;
 	bool downPressed = false;
 	
-	sndEnableSoundMono(4000, 8, soundCallback);
+	enableSoundMono(4000, 8, soundCallback);
 	
 	while (1) {
-		if (iGetState(INPUT_B) && !upPressed && pin < 7){
+		if (getButtonState(INPUT_B) && !upPressed && pin < 7){
 			pin++;
 		}
 		
-		if (iGetState(INPUT_A) && !downPressed && pin > 0){
+		if (getButtonState(INPUT_A) && !downPressed && pin > 0){
 			pin--;
 		}
 		
-		upPressed = iGetState(INPUT_B);
-		downPressed = iGetState(INPUT_A);
+		upPressed = getButtonState(INPUT_B);
+		downPressed = getButtonState(INPUT_A);
 		
 		displayPinName();
-		dSync();
+		sync();
 	}
 	return 0;
 }
