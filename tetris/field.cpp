@@ -149,17 +149,31 @@ bool Field::check(int16 x, int16 y, Field *field){
 
 // Same as check, but with shift down
 bool Field::checkDown(int16 x, int16 y, Field *field){
-	return check(x, y + 1, Field *field);
+	int16 tWidth = field->getWidth();
+	int16 tHeight = field->getHeight();
+	for (int16 iy = 0; iy < tHeight; iy++){
+		for (int16 ix = 0; ix < tWidth; ix++){
+			if (field->get(ix, iy)){
+				if (get(ix+x, iy+y+1)){
+					return true;
+				}
+				if (iy + y >= height-1){
+					return true;
+				}
+			}
+		}	
+	}
+	return false;
 }
 
 // Same as check, but with shift left
 bool Field::checkLeft(int16 x, int16 y, Field *field){
-	return check(x - 1, y, Field *field);
+	return check(x - 1, y, field);
 }
 
 // Same as check, but with shift right
 bool Field::checkRight(int16 x, int16 y, Field *field){
-	return check(x + 1, y, Field *field);
+	return check(x + 1, y, field);
 }
 
 // Copies another field to current
