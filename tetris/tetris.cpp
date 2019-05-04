@@ -4,18 +4,23 @@
 #include "highScore.h"
 #include "sound.h"
 
-//memory for 300 sprites
+// Memory for 300 sprites
+// I will not use matrix, because I need 12 pixels per sprite and matrix restrictions doesn't allow this.
+// Anyway we have a lot of RAM
 #define SPRITE_MEMORY_SIZE 16*300
-
 uint8 spriteMemory[SPRITE_MEMORY_SIZE];
+
+// Buffer for filesystem
 uint8 fsBuffer[512];
 
+// Data for our field and figures. Third for "next figure".
 uint8 mainFieldData[20*10];
 uint8 figureData[4*4];
 uint8 nextData[4*4];
-uint8 go = 0;
-uint8 speed;
+
+// Other necessary data
 int16 fPositionX, fPoisitionY;
+uint8 go = 0, speed;
 int16 move = 0;
 bool prevStateA;
 bool isGameOver;
@@ -26,6 +31,7 @@ uint8 figuresInPlay;
 int8 buffer[40];
 uint32 highScore, lastHighScore;
 
+// I will use this pallete instide of default
 const uint16 colorPalleter[] = {
 	REAL_BLACK,
 	REAL_BLACK,
@@ -45,6 +51,8 @@ const uint16 colorPalleter[] = {
 	DARK_PURPLE
 };
 
+// This is edges of our game field. It's just a column sprite. 
+// There will be better ways to do columns in the future, but now we can do such only this way.
 const uint8 edge[] = {
 	0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
 	0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
@@ -60,6 +68,8 @@ const uint8 edge[] = {
 	0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
 };
 
+// List of figures. 
+// Actually we can use bit mask and reduce from 16 bytes to 2 bytes each figure, but with this style we have a lot better view.
 const uint8 figures[][16] = {
 	{
 		1, 1, 1, 0,
@@ -135,11 +145,17 @@ const uint8 figures[][16] = {
 	},
 };
 
+// Makes new figure in next field
 void makeNewFigure(){
+	// View representation random selection
 	uint8 sNum = (rand()%FIELD_SPRITE_COUNT)+1, i;
-	uint8 rotCount = rand()%4;
-	uint8 figNum = rand() % figuresInPlay;
 	
+	// Random rotating of figure
+	uint8 rotCount = rand()%4;
+	
+	// Namber of figure based on level
+	uint8 figNum = rand() % figuresInPlay;
+		
 	memcpy(nextData, figures[figNum], 4*4);
 	for (i = 0; i < 4*4; i++){
 		nextData[i] = nextData[i] ? sNum : 0;
@@ -150,6 +166,7 @@ void makeNewFigure(){
 	}
 }
 
+// Copies next to current
 void setNext(){
 	memcpy(figureData, nextData, 4*4);
 	makeNewFigure();
@@ -158,6 +175,7 @@ void setNext(){
 	fPoisitionY = -2;
 }
 
+// Does what it says
 void newGame(){
 	score = 0;
 	isGameOver = false;
@@ -173,6 +191,7 @@ void newGame(){
 	setNext();
 }
 
+// Updates current level, speed and number of figures in play
 void updateLevel(){
 	level = (score/10000)+1;
 	speed = level < 10 ? 20-level : 10;
@@ -197,31 +216,39 @@ int32 main(){
 				go = 0;
 				if (mainField.checkDown(fPositionX, fPoisitionY, &figure)){
 					if (fPoisitionY >= 0){
+						// Placing figure on the main field
 						mainField.copy(fPositionX, fPoisitionY, &figure);
 						setNext();
+						
+						// Cheking explosions and getting count of it
 						uint8 counter = 0;
 						while(1){
 							int8 exp = mainField.explode();
 							if (exp == 255) break;
 							counter++;
 						}
-						const uint16 scoreCount[] = { 0, 100, 300, 600, 1200 };
-						score += scoreCount[counter];
-						updateLevel();
+						
+						// Adding score
 						if (counter > 0){
+							const uint16 scoreCount[] = { 0, 100, 300, 600, 1200 };
+							score += scoreCount[counter];
+							updateLevel();
 							playNoize(0x30, -2, 2, 600, 4);
 						}
 					} else {
+						// Game over
 						playNoize(0x40, -1, 1, 2000, 2);
 						isGameOver = true;
 						lastHighScore = highScore;
 						if (lastHighScore < score){
+							// Saving new high score to SD
 							setHighScore(score);
 							highScore = score;
 						}
 						continue;
 					}
 					
+					// Hit sound
 					playNoize(0x04, 0, 4, 50, 6);
 				}else{
 					fPoisitionY++;
@@ -260,10 +287,12 @@ int32 main(){
 				}
 			}
 
+			// Drawing
 			mainField.draw(40, 0);
 			figure.draw(fPositionX*12+40, fPoisitionY*12);
 			next.draw(170, 96);
 			
+			// Statistics
 			itoa(score, buffer);
 			displayText("SCORE", 4, 170, 10, false);
 			displayText(buffer, 4, 310-(strlen(buffer)*8-1), 10, false);
@@ -272,6 +301,7 @@ int32 main(){
 			displayText(buffer, 4, 310-(strlen(buffer)*8-1), 30, false);
 			displayText("NEXT:", 4, 170, 80, false);
 		} else {
+			// Screen of death
 			if (getButtonState(INPUT_A) && !prevStateA){
 				newGame();
 			}
@@ -292,6 +322,7 @@ int32 main(){
 			}
 		}
 		
+		// Field columns
 		displaySpriteBitMask(edge, 5, 40-16, 0, 1, 120);
 		displaySpriteBitMask(edge, 5, 40+120, 0, 1, 120, SPRITE_FLAG_H_MIRROR);
 		

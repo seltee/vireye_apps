@@ -3,6 +3,7 @@
 
 #define FIELD_SPRITE_COUNT 5
 
+// Field class. Field is just a matrix of blocks with all necessary functions with them
 class Field{
 public:
 	void init(int16 width, int16 height, uint8 *data);

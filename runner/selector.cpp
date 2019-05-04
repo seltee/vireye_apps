@@ -4,6 +4,8 @@
 #include "sound_player.h"
 #include "config.h"
 
+// This page allows you to run programs, go to play sound page and open configuration
+
 enum{
 	EXT_UNKNOWN = 0,
 	EXT_WAV

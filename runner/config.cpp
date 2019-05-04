@@ -3,6 +3,8 @@
 #include "utils.h"
 #include "selector.h"
 
+// this page currently shows to changeble options of inverting X and Y axises.
+
 CoreConfig oldConfig;
 uint8 menuSelector;
 uint8 prevState = 0, move;

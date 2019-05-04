@@ -3,6 +3,10 @@
 uint8 pin = 0;
 uint8 counter = 0;
 
+// Callback that will be called 4000 times per second
+// Output based on selected pin. 
+// Each bit of byte affects different pin with different resistance.
+// Thats the main idea
 uint16 soundCallback(){
 	counter++;
 	if (counter < 64){
@@ -11,6 +15,7 @@ uint16 soundCallback(){
 	return 0;
 }
 
+// Displays pin name
 void displayPinName(){
 	switch(pin){
 		case 0:
@@ -53,6 +58,7 @@ int32 main(){
 	
 	enableSoundMono(4000, 8, soundCallback);
 	
+	// Controls pins switching and displays it's name
 	while (1) {
 		if (getButtonState(INPUT_B) && !upPressed && pin < 7){
 			pin++;

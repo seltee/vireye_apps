@@ -3,6 +3,10 @@
 #include "utils.h"
 #include "selector.h"
 
+// This page playes sounds. 
+// It just enables sound system on freq and bitdepth of the sound file.
+// Then it sends information from SD to buffer in infinit loop.
+
 struct WavStruct{
 	uint8 sig[4];
 	uint32 fileSize;

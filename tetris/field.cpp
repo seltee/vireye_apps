@@ -1,5 +1,6 @@
 #include "field.h"
 
+// Graphics representation of each block
 const uint8 sprites[][144] = {
 	{
 		0x02, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x02,
@@ -73,6 +74,7 @@ const uint8 sprites[][144] = {
 	}
 };
 
+// Class initialization - with, size, data. You may wonder, why I'm not using new? It's simply not works :D 
 void Field::init(int16 width, int16 height, uint8 *data){
 	this->width = width;
 	this->height = height;
@@ -82,6 +84,7 @@ void Field::init(int16 width, int16 height, uint8 *data){
 	realWidth = 0;
 }
 
+// Draw the field at position
 void Field::draw(int16 x, int16 y){
 	//we can't use matrix, because it works only with sprites size multiples of two
 	for (int16 iy = 0; iy < height; iy++){
@@ -96,7 +99,7 @@ void Field::draw(int16 x, int16 y){
 	}
 }
 
-
+// Set one block in the position with all necessary checking
 void Field::set(int16 x, int16 y, uint8 sprite){
 	uint16 vl;
 	if (x >= 0 && x < width && y >= 0 && y < height && sprite >= 0 && sprite <= FIELD_SPRITE_COUNT){
@@ -104,6 +107,7 @@ void Field::set(int16 x, int16 y, uint8 sprite){
 	}
 }
 
+// Get block, if position is outside - returns 0. Usefull.
 uint8 Field::get(int16 x, int16 y){
 	if (x >= 0 && x < width && y >= 0 && y < height){
 		return data[x + y*width];
@@ -111,18 +115,23 @@ uint8 Field::get(int16 x, int16 y){
 	return 0;
 }
 
+// Real with calculated by occupied blocks
 int16 Field::getRealWidth(){
 	return realWidth;
 }
 
+// Width of field
 int16 Field::getWidth(){
 	return width;
 }
 
+// Height of field
 int16 Field::getHeight(){
 	return height;
 }
 
+// Compares blocks in two fields, current and another one.
+// If there some hits - returns true
 bool Field::check(int16 x, int16 y, Field *field){
 	int16 tWidth = field->getWidth();
 	int16 tHeight = field->getHeight();
@@ -138,54 +147,22 @@ bool Field::check(int16 x, int16 y, Field *field){
 	return false;
 }
 
+// Same as check, but with shift down
 bool Field::checkDown(int16 x, int16 y, Field *field){
-	int16 tWidth = field->getWidth();
-	int16 tHeight = field->getHeight();
-	for (int16 iy = 0; iy < tHeight; iy++){
-		for (int16 ix = 0; ix < tWidth; ix++){
-			if (field->get(ix, iy)){
-				if (get(ix+x, iy+y+1)){
-					return true;
-				}
-				if (iy + y >= height-1){
-					return true;
-				}
-			}
-		}	
-	}
-	return false;
+	return check(x, y + 1, Field *field);
 }
 
+// Same as check, but with shift left
 bool Field::checkLeft(int16 x, int16 y, Field *field){
-	int16 tWidth = field->getWidth();
-	int16 tHeight = field->getHeight();
-	for (int16 iy = 0; iy < tHeight; iy++){
-		for (int16 ix = 0; ix < tWidth; ix++){
-			if (field->get(ix, iy)){
-				if (get(ix+x-1, iy+y)){
-					return true;
-				}
-			}
-		}	
-	}
-	return false;
+	return check(x - 1, y, Field *field);
 }
 
+// Same as check, but with shift right
 bool Field::checkRight(int16 x, int16 y, Field *field){
-	int16 tWidth = field->getWidth();
-	int16 tHeight = field->getHeight();
-	for (int16 iy = 0; iy < tHeight; iy++){
-		for (int16 ix = 0; ix < tWidth; ix++){
-			if (field->get(ix, iy)){
-				if (get(ix+x+1, iy+y)){
-					return true;
-				}
-			}
-		}	
-	}
-	return false;
+	return check(x + 1, y, Field *field);
 }
 
+// Copies another field to current
 void Field::copy(int16 x, int16 y, Field *field){
 	uint8 t;
 	int16 ix, iy;
@@ -201,6 +178,7 @@ void Field::copy(int16 x, int16 y, Field *field){
 	}
 }
 
+// Rotates current field and shifts to top-left conner
 void Field::rotate(){
 	memcpy(prev, data, width*width);
 	uint8 buffer[16], ix, iy;
@@ -213,10 +191,12 @@ void Field::rotate(){
 	clearGups();
 }
 
+// Returns to state before rotation
 void Field::revert(){
 	memcpy(data, prev, width*width);
 }
 
+// Shifts to top-left conner
 void Field::clearGups(){
 	uint8 hGup, vGup, ix, iy;
 	for (hGup = 0; hGup < 3; hGup++){
@@ -240,6 +220,7 @@ void Field::clearGups(){
 	}
 }
 
+// Return true if there are blocks in column
 bool Field::hasSomeInColumn(uint8 column){
 	for (uint8 i = 0; i < height; i++){
 		if (get(column, i)){
@@ -249,6 +230,7 @@ bool Field::hasSomeInColumn(uint8 column){
 	return false;
 }
 
+// Return true if there are blocks in row
 bool Field::hasSomeInRow(uint8 row){
 	for (uint8 i = 0; i < width; i++){
 		if (get(i, row)){
@@ -258,6 +240,7 @@ bool Field::hasSomeInRow(uint8 row){
 	return false;	
 }
 
+// Calculates width based on last block in rows
 void Field::calcRealWidth(){
 	realWidth = 0;
 	for (uint16 i = 0; i < width; i++){
@@ -267,6 +250,7 @@ void Field::calcRealWidth(){
 	}
 }
 
+// Searches for full lines and removes them. Returns number of removed line
 int8 Field::explode(){
 	for (uint8 iy = 0; iy < height; iy++){
 		uint8 ix = 0;
