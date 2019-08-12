@@ -191,8 +191,8 @@ void updateLevel(){
 }
 
 int32 main(){
-	setSpriteLimit(300);
 	setPalette(colorPalleter);
+	setSpriteLimit(300);
 	initSound();
 	highScore = getHighScore();
 	setFPS(30);
@@ -318,6 +318,7 @@ int32 main(){
 		
 		displayText("VIREYE TETRIS", 4, 170, 220, false);
 		prevStateA = getButtonState(INPUT_A);
+				
 		sync();
 	}
 }

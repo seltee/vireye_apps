@@ -1,7 +1,6 @@
 #include "sound.h"
 
 #define MAIN_FREQ 22050
-
 #define TYPE_FREQ 0x01
 #define TYPE_NOIZE 0x02
 
@@ -70,7 +69,7 @@ uint16 soundCallback(){
 
 // Enables sound subsystem. It not needs external buffers.
 void initSound(){
-	memset(channels, 0, sizeof(Channel)*10);
+	memset(channels, 0, sizeof(Channel)*4);
 	enableSoundMono(MAIN_FREQ, 8, soundCallback);
 }
 

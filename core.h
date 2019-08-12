@@ -100,7 +100,13 @@ SYS_FN void setFillColor(FillColor fillNum);
 
 // Sets maximum amount of sprites on one frame. 
 // Also this function allocates memory 16*count from heap. You may free it by disabling graphics.
-SYS_FN void setSpriteLimit(uint16 count);
+SYS_FN bool setSpriteLimit(uint16 count);
+
+// Get current maximum amount of sprites
+SYS_FN uint16 getSpriteLimit();
+
+// Get current amount of sprites in cash
+SYS_FN uint16 getSpriteCash();
 
 // Displays sprite on the screen. For all drawing sprite functions you need to set up sprite memory, or it will not work
 SYS_FN void displaySprite(const uint8 *sprite, int16 x, int16 y, int16 width, int16 height, uint8 flags = SPRITE_FLAG_NO, bool upScale = true);
