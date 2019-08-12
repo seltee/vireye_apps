@@ -3,10 +3,11 @@
 
 // Get's high score from file
 uint32 getHighScore(){
-	FileWorker fileWorker;
-	if (openToRead("/t-score.tet", &fileWorker)){
+	File file = openToRead("/t-score.tet");
+	if (file){
 		uint32 score;
-		readFile(&fileWorker, &score, 4);
+		readFile(file, &score, 4);
+		closeFile(file);
 		return score;
 	}
 	return 0;
@@ -14,9 +15,9 @@ uint32 getHighScore(){
 
 // Put's high score into file
 void setHighScore(uint32 score){
-	FileWorker fileWorker;
-	if (openToWrite("/t-score.tet", &fileWorker)){
-		writeFile(&fileWorker, &score, 4);
-		closeFile(&fileWorker);
+	File file = openToWrite("/t-score.tet");
+	if (file){
+		writeFile(file, &score, 4);
+		closeFile(file);
 	}
 }

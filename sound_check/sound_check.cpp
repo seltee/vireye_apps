@@ -56,6 +56,7 @@ int32 main(){
 	bool upPressed = false;
 	bool downPressed = false;
 	
+	setSpriteLimit(80);
 	enableSoundMono(4000, 8, soundCallback);
 	
 	// Controls pins switching and displays it's name

@@ -8,6 +8,8 @@ typedef unsigned short uint16;
 typedef unsigned int uint32;
 
 #define SYS_FN extern "C" __declspec(dllimport)
+#define DirectoryReader void*
+#define File void*
 
 // Color format:
 // RRRRRGGGGGGBBBBB
@@ -52,13 +54,9 @@ enum FileFlags{
 	FILE_FLAG_SYSTEM = 0x02
 };
 
-struct Matrix{
+struct SpriteMatrix{
 	const uint8 **sprites;
 	uint8 *matrix;
-};
-
-struct DirectoryReader{
-	char data[12];
 };
 
 struct FileInfo{
@@ -83,10 +81,8 @@ struct FileInfo{
 	
 	unsigned short createYear;
 	unsigned short permissions;
-};
-
-struct FileWorker{
-	char data[32];
+	
+	char *fileName;
 };
 
 struct CoreConfig{
@@ -102,8 +98,9 @@ SYS_FN void setLineClear(bool state);
 // Fill color of the line.
 SYS_FN void setFillColor(FillColor fillNum);
 
-// Sprites need some memory to be placed in. If you want more sprites - give them more memory. It's good idea to start from 800 bytes and rise this value if it will be not enough.
-SYS_FN void setSpriteMemory(uint8 *address, uint32 size);
+// Sets maximum amount of sprites on one frame. 
+// Also this function allocates memory 16*count from heap. You may free it by disabling graphics.
+SYS_FN void setSpriteLimit(uint16 count);
 
 // Displays sprite on the screen. For all drawing sprite functions you need to set up sprite memory, or it will not work
 SYS_FN void displaySprite(const uint8 *sprite, int16 x, int16 y, int16 width, int16 height, uint8 flags = SPRITE_FLAG_NO, bool upScale = true);
@@ -115,7 +112,13 @@ SYS_FN void displaySpriteBitMask(const uint8 *sprite, uint8 color, int16 x, int1
 SYS_FN void displaySpriteByteMask(const uint8 *sprite, uint8 color, int16 x, int16 y, int16 width, int16 height, uint8 flags = SPRITE_FLAG_NO, bool upScale = true);
 
 // Displays sprite matrix. Matrix in matrix structure contains numbers of the sprites in the structure field sprites. Sprites contain array of pointers to the sprite data. All of them need to be same with and height (sprites must be squares) defined by size.
-SYS_FN void displaySpriteMatrix(const Matrix *matrix, int8 size, int16 x, int16 y, int16 width, int16 height, uint8 flags = SPRITE_FLAG_NO, bool upScale = true);
+SYS_FN void displaySpriteMatrix(const SpriteMatrix *matrix, int8 size, int16 x, int16 y, int16 width, int16 height, uint8 flags = SPRITE_FLAG_NO, bool upScale = true);
+
+// Display filled rect
+SYS_FN void displayFilledRect(uint8 color, int16 x, int16 y, int16 width, int16 height, bool upScale = true);
+
+// Display rect
+SYS_FN void displayRect(uint8 color, int16 x, int16 y, int16 width, int16 height, bool upScale = true);
 
 // Displays text. Note - each letter is independent sprite, so, it will take sprite memory.
 SYS_FN void displayText(const int8 *string, uint8 color, uint16 x, uint16 y, bool upscale = true);
@@ -130,6 +133,20 @@ SYS_FN void setFPS(unsigned short limit);
 // Note: call it only after you arranged sprite memory
 SYS_FN void setPalette(const uint16 *colors);
 
+// By disabling graphics you may get extra memory
+SYS_FN void disableGraphics();
+
+// MEMORY
+// Allocate memory from heap. Returns pointer to first byte. Allocated size will be alligned to 16 bytes blocks
+SYS_FN int8* malloc(uint32 size);
+
+// Free allocated memory from heap by pointer to first byte
+SYS_FN void free(void *memory);
+
+// Returns number of free memory in heap. 
+// Keep in mind, that this memory may be fragmented and no garanty, that you will be able to get it all in one big block.
+SYS_FN uint32 getFreeMem();
+
 
 // INPUT
 // Get state of button
@@ -141,30 +158,31 @@ SYS_FN int16 getXAxis();
 // Get state of Y axis of analog.
 SYS_FN int16 getYAxis();
 
-// FILE SYSTEM
-// Init file system. Buffer of 512 bytes is needed
-SYS_FN bool setFSMemory(uint8 *newBuffer);
 
+// FILE SYSTEM
 // Open folder to read
-SYS_FN bool readDir(int8 *path, DirectoryReader *dirReader);
+SYS_FN DirectoryReader readDir(int8 *path);
 
 // Read next file. Buffer for name must be at least 14 bytes
-SYS_FN bool readNextFile(int8 *fileName, int32 fileNameMaxLength, DirectoryReader *dirReader, FileInfo *fileInfo);
+SYS_FN FileInfo *readNextFile(DirectoryReader reader);
+
+// Close directory after reading and free memory
+SYS_FN void closeDir(DirectoryReader reader);
 
 // Open file for reading
-SYS_FN bool openToRead(int8 *filePath, FileWorker *fileWorker);
+SYS_FN File openToRead(int8 *filePath);
 
 // Open file for writing
-SYS_FN bool openToWrite(int8 *filePath, FileWorker *fileWorker);
+SYS_FN File openToWrite(int8 *filePath);
 
 // Read data from file to buffer. In return you will get bytes actually readed
-SYS_FN uint32 readFile(FileWorker *fileWorker, void *dst, uint32 length);
+SYS_FN uint32 readFile(File file, void *dst, uint32 length);
 
 // Write data to file from buffer. In return you will get bytes actually writed
-SYS_FN uint32 writeFile(FileWorker *fileWorker, void *src, uint32 length);
+SYS_FN uint32 writeFile(File file, void *src, uint32 length);
 
 // Close file after read
-SYS_FN bool closeFile(FileWorker *fileWorker);
+SYS_FN void closeFile(File file);
 
 // SOUND
 // Enables mono sound output. First parameter is frequency in wich samples will go to DAC. 
@@ -194,7 +212,7 @@ SYS_FN bool cmp(const int8 *str1, const int8 *str2);
 SYS_FN void itoa(int32 n, int8 str1[]);
 
 // SYSTEM
-// You need to pass buffer with at least 8 kb free to run the programm
+// You need to pass buffer with at least 9 kb free to run the programm
 SYS_FN void run(int8 *path, uint8 *ramBuffer);
 
 // Default

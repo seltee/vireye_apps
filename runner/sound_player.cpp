@@ -31,7 +31,7 @@ bool rightPart;
 int readed;
 bool playing;
 
-FileWorker fileWorker;
+File file = 0;
 WavStruct wavStruct;
 
 uint16 snd(){
@@ -71,7 +71,7 @@ char soundPlayerUpdate(){
 			
 		if (!rightPart && position < 3*1024){
 			rightPart = true;
-			addition = readFile(&fileWorker, megaBuffer+3*1024, 3*1024);
+			addition = readFile(file, megaBuffer+3*1024, 3*1024);
 			if (addition){
 				readed += addition;
 			}else{
@@ -81,7 +81,7 @@ char soundPlayerUpdate(){
 		
 		if (rightPart && position > 3*1024){
 			rightPart = false;
-			addition = readFile(&fileWorker, megaBuffer, 3*1024);
+			addition = readFile(file, megaBuffer, 3*1024);
 			if (addition){
 				readed += addition;
 			}else{
@@ -100,17 +100,18 @@ char soundPlayerUpdate(){
 	return MODE_SOUND_PLAYER;
 }
 
-char openSoundPlayer(char *file){
-	if (!openToRead(file, &fileWorker)) return 0;
+char openSoundPlayer(char *filePath){
+	file = openToRead(filePath);
+	if (!file) return 0;
 
-	readFile(&fileWorker, &wavStruct, 44);
+	readFile(file, &wavStruct, 44);
 
 	lengthPlayed = 0;
 	prevSample = 0;
 	position = 0;
 	rightPart = false;
 	bytesPerSample = wavStruct.numberOfChannels * (wavStruct.bitsPerSample >> 3);
-	readed = readFile(&fileWorker, megaBuffer, 3*1024);
+	readed = readFile(file, megaBuffer, 3*1024);
 	playing = true;
 	
 	enableSoundMono(wavStruct.sampleRate, wavStruct.bitsPerSample, snd);

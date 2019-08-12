@@ -5,7 +5,6 @@
 #include "config.h"
 
 // This page allows you to run programs, go to play sound page and open configuration
-
 enum{
 	EXT_UNKNOWN = 0,
 	EXT_WAV
@@ -109,15 +108,19 @@ char selectorUpdate(){
 
 // Builds file list in folder
 void updateFolder(){
-	DirectoryReader dirReader;
-	FileInfo fileInfo;
-	readDir(path, &dirReader);
-	fCount = 0;
-	while(readNextFile(files[fCount].name, 15, &dirReader, &fileInfo)){
-		if (fCount < 64 && !(fileInfo.flags & FILE_FLAG_HIDDEN) && !cmp(".", files[fCount].name)){
-			files[fCount].type = fileInfo.fileType;
-			fCount++;
+	DirectoryReader dirReader = readDir(path);
+	if (dirReader){
+		FileInfo *fileInfo;
+		fCount = 0;
+		while((fileInfo = readNextFile(dirReader))){
+			if (fCount < 64 && !(fileInfo->flags & FILE_FLAG_HIDDEN) && !cmp(".", fileInfo->fileName)){
+				files[fCount].type = fileInfo->fileType;
+				memcpy(files[fCount].name, fileInfo->fileName, 15);
+				files[fCount].name[14] = 0;
+				fCount++;
+			}
 		}
+		closeDir(dirReader);
 	}
 }
 

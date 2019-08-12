@@ -4,15 +4,6 @@
 #include "highScore.h"
 #include "sound.h"
 
-// Memory for 300 sprites
-// I will not use matrix, because I need 12 pixels per sprite and matrix restrictions doesn't allow this.
-// Anyway we have a lot of RAM
-#define SPRITE_MEMORY_SIZE 16*300
-uint8 spriteMemory[SPRITE_MEMORY_SIZE];
-
-// Buffer for filesystem
-uint8 fsBuffer[512];
-
 // Data for our field and figures. Third for "next figure".
 uint8 mainFieldData[20*10];
 uint8 figureData[4*4];
@@ -200,8 +191,7 @@ void updateLevel(){
 }
 
 int32 main(){
-	setSpriteMemory(spriteMemory, SPRITE_MEMORY_SIZE);
-	setFSMemory(fsBuffer);
+	setSpriteLimit(300);
 	setPalette(colorPalleter);
 	initSound();
 	highScore = getHighScore();

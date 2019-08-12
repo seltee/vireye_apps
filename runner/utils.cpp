@@ -1,7 +1,6 @@
 #include "utils.h"
 
-uint8 readBuffer[512];
-uint8 megaBuffer[6*1024];
+uint8 megaBuffer[8*1024];
 uint8 drawBuffer[2400];
 
 const uint8 selectedSprite[20*6] = { 

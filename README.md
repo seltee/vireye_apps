@@ -7,7 +7,10 @@ This is basic SD file manager (Also it can play .wav files!). If you put autorun
 Press select to configure your game console.
 
 ## Sound check
-This little program is intended to check are all of your sound DAC pins soldered correctly. Use A and B buttons to switch pins.
+This little program is intended to check are all of your sound DAC pins soldered correctly. Use A and B buttons to switch pins. Helpfull only if you are using resistor built DAC.
 
 ## Tetris
 Brick Game/Tetris made for Vireye. Includes level changing, different figures, simple sound and memorizing high score throw SD card. Basic game example.
+
+## Dynamic Memory
+This program shows you the basics of new and delete and also one direction lists. Note, that memory allocates by 16 byte blocks, so, if you're allocating 4 bytes, you will get 16 byte block from memory.
