@@ -14,3 +14,6 @@ Brick Game/Tetris made for Vireye. Includes level changing, different figures, s
 
 ## Dynamic Memory
 This program shows you the basics of new and delete and also one direction lists. Note, that memory allocates by 16 byte blocks, so, if you're allocating 4 bytes, you will get 16 byte block from memory.
+
+## Converting sprites
+It's an example of how you can easily convert images into c arrays suitable for running on vireye and how to use this arrays to show real sprites on your game console. More info about flags and how to use converter you may found on tools repo: https://github.com/seltee/vireye_tools

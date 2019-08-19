@@ -142,6 +142,14 @@ SYS_FN void setPalette(const uint16 *colors);
 // By disabling graphics you may get extra memory
 SYS_FN void disableGraphics();
 
+// Sets callback, that will be called on drawing each string before main drawing. 
+// First parameter will be color array, second - number of string
+SYS_FN void setPreProcessCallback(void (*callback)(unsigned short *, unsigned short));
+
+// Sets callback, that will be called on drawing each string after main drawing. 
+// First parameter will be color array, second - number of string
+SYS_FN void setPostProcessCallback(void (*callback)(unsigned short *, unsigned short));
+
 // MEMORY
 // Allocate memory from heap. Returns pointer to first byte. Allocated size will be alligned to 16 bytes blocks
 SYS_FN int8* malloc(uint32 size);

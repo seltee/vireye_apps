@@ -83,8 +83,6 @@ void updateAndDisplaySprites(){
 	}
 }
 
-
-
 int32 main(){
 	// Init sprite subsystem
 	setSpriteLimit(10);
